@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Visionneuse Zones Humides de Bogota</title>
+		<meta charset="UTF-8">
+		<!-- Téléchargement de la bibliothèque Leaflet.js -->
+		<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+		<!-- Importer le plugin AJAX -->
+		<script src="plugins/leaflet.ajax.min.js"></script>
+		<!-- Téléchargement des instructions CSS de Leaflet, qui serviront à styliser les éléments de l'interface de la carte -->
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+		<!-- Inclure le contrôle plein écran-->
+		<!-- Licence ISC  
+		Copyright (c) 2015, MapBox -->
+        <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
+		<link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' rel='stylesheet' />
+		<!-- Plugin Timeline slider -->
+		<!-- Importation de JQuery timeline-slider-->
+		<!-- MIT Licence
+		Copyright (c) 2019 Sol Vitkin -->
+		<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+		<script src="plugins/leaflet-timeline-slider.min.js"></script>
+		<!--Importation des instructions CSS et des fonction JS de Bootstrap-->
+		<!-- Licenced MIT, docs CC BY 3.0. -->
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+		<!-- Loading control -->
+		<!-- License MIT -->
+		<!-- Copyright (c) 2013 Eric Brelsford -->
+		<link rel="stylesheet" href="https://rawgithub.com/ebrelsford/Leaflet.loading/master/src/Control.Loading.css">
+		<script src="https://rawgithub.com/ebrelsford/Leaflet.loading/master/src/Control.Loading.js"></script>
+		<!-- Print -->
+		<!-- Licence MIT
+		Copyright (c) 2017 Igor Vladyka <igor.vladyka@gmail.com> (https://github.com/Igor-Vladyka/) -->
+		<script src="plugins/leaflet.browser.print.min.js"></script>
+		
+	<style>
+		html, body {height: 100%; margin: 4;}
+		#Carte {width: 100%; height: 92%;}
+		.boite1 {
+			padding: 16px 16px;
+			font: 16px/18px times;
+			background: white;
+			background: rgba(255,255,255,.8);
+			box-shadow: 0 0 15px rgba(0,0,0,.2);
+			border-radius: 5px;
+		}
+			
+		.info h4 {
+			margin: 0 0 5px; color: #777;
+		}
+	
+		.legend {
+			text-align: left;
+			line-height: 20px;
+			color: #555;
+		}
+		
+		.legend i {
+			font : 18px Helvetica;
+			width: 18px;
+			height: 18px;
+			float: left;
+			margin-right: 8px;
+			opacity: .7
+		}
+
+		h1 {
+			font-family: segoe;
+			font-size: 20pt;
+			color: rgb(10,7,133);
+			text-align:center;
+		}
+			
+		p {
+			font-family: segoe;
+			font-size: 15pt;
+			color: black;
+			text-align:justify;
+		}
+			
+	</style>
+	</head>
+	
+	<body>
+	<nav class="navbar navbar-expand-lg navbar-light bg-light static-top">
+		
+		
+		<h1 class="text-uppercase">Almond crops spatio-temporal changes in California from 2012 to 2021</h1>
+		</div>
+		
+	</nav>
+		<!--		Création d'un <div> qui contiendra la carte-->
+		<div id='Carte'></div>
+
+		<!--		Début du script JavaScript-->
+		<script>
+			
+		var layers2;
+		var zh_sel;	//variable qui gardera la liste des zones humides sélectionneées pour l'utilisateur-trice
+		// Initialisation de la carte avec plusieurs fonds de carte
+		// Nous mettons l'adresse de l'API MapBox dans une variable 'mapboxUrl'.
+		mapboxUrl = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoieWVubnljdWVsbGFyIiwiYSI6ImNrbGd0ZnBpMjI4Nngyb3RrdXJkZmpmM3oifQ.eqHaowCnKwB8KgRe_auZfQ'
+		// Création d'une variable dans laquelle nous mettons les informations d'attribution
+		mapboxAttribution = 'Fond de carte &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' + '<a href="https://creativecommons.org/Licences/by-sa/2.0/">CC-BY-SA</a>, ' + 'via © <a href="https://www.mapbox.com/">Mapbox</a> Données &copy; <a href="https://visorgeo.ambientebogota.gov.co/?lon=-74.088180&lat=4.661370&z=11&l=5:1">Secretaría Distrital de Ambiente</a>'
+		// Création des quatre fond de carte en réutilisant les variables précédemment céées
+		light = L.tileLayer(mapboxUrl, {id: 'mapbox/light-v10', attribution: mapboxAttribution})
+		streets = L.tileLayer(mapboxUrl, {id: 'mapbox/streets-v11', attribution: mapboxAttribution})
+		sat = L.tileLayer(mapboxUrl, {id: 'mapbox/satellite-streets-v11', attribution: mapboxAttribution})
+					
+        //Création d'une variable "maCarte" qui contiendra... ma carte.
+		maCarte = L.map('Carte',{
+			center: [36.785451, -119.868040],
+			zoom: 7,
+			layers: [streets,sat,light],
+			fullscreenControl: { 
+				pseudoFullscreen: false,
+				title: {
+					'false': 'Voir plein écran',
+					'true': 'Sortir plein écran'
+				}
+			}
+		})
+		//boîte de control pour le contrôle plein écran
+		
+
+		//boîte de control qui se déclenche à chaque chargement de données
+		var loadingControl = L.Control.loading({
+            separate: true
+        }).addTo(maCarte)
+		
+        baseMaps = {
+			"Rues": streets,
+			"Satellite": sat,
+			"Gris": light,
+		}
+		//boite de control info polygones
+		// contrôle qui affiche la boite d'état 1 au survol
+		boite1 = L.control({'position': 'topright'})
+		boite1.onAdd = function (maCarte) {
+			this._div = L.DomUtil.create('div', 'boite1'); // créer un div avec une classe "boite 1"
+			this.update()
+			return this._div
+		}
+		
+		//Ajoute la boîte de control des fonds à la carte	
+		L.control.layers(baseMaps).addTo(maCarte)
+		
+		
+		//style des couches
+		function estilo(feature) {
+			return {
+				weight: .5,
+				opacity: .5,
+				color: 'black',
+				dashArray: '3',
+				fillOpacity: 0.95,
+				fillColor: getColor(feature.properties.cobertura)
+			}
+		}		
+		//Listeners
+		//zoom
+		function zoomToFeature(e) {
+			maCarte.fitBounds(e.target.getBounds())
+		}
+		//pour souligner chaque élément des couches	
+		function highlightFeature(e) {
+			var layer = e.target
+			layer.setStyle({
+				weight: 5,
+				color: '#666',
+				dashArray: '',
+				fillOpacity: 0.5
+			});
+		boite1.update(layer.feature.properties)
+		}
+		//pour arrêter de mettre en évidence les éléments				
+		function resetHighlight(e) {
+			layers2.resetStyle(e.target)
+			boite1.update()
+		}
+		//pour attacher les listeners aux couches	
+		function onEachFeature(feature, layer) {
+			layer.on({
+				click: zoomToFeature,
+				mouseover: highlightFeature,
+				mouseout: resetHighlight,
+			})
+		}
+		//Fonction de chargement des données
+		function charge(object){
+			layers2 = new L.GeoJSON.AJAX('data/' +  object.label +  '.geojson', {
+			style: estilo,
+			onEachFeature: onEachFeature
+			}).addTo(maCarte)}
+		
+		
+		//Implémentation de Timeline slider
+		//Fonction qui s'exécutera lorsque l'élément de la chronologie est choisi
+		function changeMapFunction(object){
+			if (maCarte.hasLayer(layers2) == true){
+				maCarte.removeLayer(layers2)
+			}
+			charge(object)
+		}
+		//boîte de control du curseur de chronologie	
+		L.control.timelineSlider({
+			title: 'Choisissez',
+            timelineItems: ["2012","2013","2014","2015","2016","2017","2018","2019" ,"2020" ,"2021"],
+            changeMap: changeMapFunction }).addTo(maCarte);
+			
+		
+			
+		//Plugin qui laisse imprimer la carte avec le plugin leaflet.browser.print en format .pdf
+		L.control.browserPrint({
+			title: 'Imprimer',
+		}).addTo(maCarte);
+		//pour imprimer la légende aussi
+		maCarte.on("browser-print-start", function(e){
+			L.legendControl({position: 'bottomleft'}).addTo(e.printMap);
+		});
+		</script>
+	</body>
+</html>
